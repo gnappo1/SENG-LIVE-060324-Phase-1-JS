@@ -107,7 +107,7 @@ function scopey() {
     var a = "first Value";
     let b = "first Value";
     const c = "first Value";
-  
+
     if (true) {
     //! Define three block-scoped variables (only available within the block)
       var a = "second Value";
@@ -116,10 +116,11 @@ function scopey() {
     }
     
     // what will each statement log to the console?
-    console.log("a (var) is,", a);
-    console.log("b (let) is,", b);
-    console.log("c (const) is,", c);
+    console.log("a (var) is,", a); // second value
+    console.log("b (let) is,", b); // first value
+    console.log("c (const) is,", c); // first value
 }
+// scopey()
 
 // After Break
 
@@ -127,12 +128,43 @@ function scopey() {
 // and logs a message explaining the name of the function, the argument passed and 
 // the return value 
 
+// Log is called Higher Order Function
+// fn is called a callback, a fn passed in as argument and invoked later on
+function log(fn, messageString) {
+  console.log("Welcome")
+  fn(messageString)
+  return fn
+}
+
+const testFn = (msg) => console.log(msg)
+
+// log(testFn, "My name is Matteo")
+
 //! 💡 Practice using callbacks for iteration
 
-// ✅ Print out each book name in our inventory
+// ✅ Print out each book title in our inventory
+// for (const book of inventory) {
+//   console.log(book.title)
+// }
 
+// Array Higher Order Iterator Functions
+// forEach -> ONLY iterates and returns NOTHING
+// inventory.forEach(function(bookObj) {
+//   console.log(bookObj.title)
+// })
+
+// inventory.forEach((bookObj, bookIndex)=>console.log(bookObj.title))
 // ✅ Create an array of strings from the inventory in the following format:
 // 'Eloquent JavaScript: A Modern Introduction to Programming by Marjin Haverbeke is on sale for $10.00'
+// map -> creates a new array, populate the new array based on what your function says, AND it will return the new array for you
+const newArrayWithBlurbs = inventory.map((bookObj) => blurb(bookObj))
+console.log("🚀 ~ newArrayWithBlurbs:", newArrayWithBlurbs)
 
 // ✅ Find all the books with price over $25.00 
+// find
+// filter
+// reduce
+
 //! 💡 When do I use forEach vs map?
+// forEach only when you simply want to iterate and do something without creating new data structures
+// map you only use it when you want to create a new array (non destructively) starting from an initial array
