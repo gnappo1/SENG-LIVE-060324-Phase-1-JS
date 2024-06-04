@@ -1,4 +1,5 @@
-//Data 
+//Data
+
 const inventory = [
   {
     id: 1,
@@ -71,14 +72,33 @@ create a formatPrice(price) function that accepts a price (number) as an argumen
 and returns the price formatted as a string. formatPrice(10) => '$10.00'
 */
 
+// function formatPrice(priceToConvert) {
+//   return `$${priceToConvert.toFixed(2)}`
+// }
+
 // Start here!
 
-//! 💡 Arrow functions vs regular functions
+//! 💡 Arrow functions vs regular function declaration
 
 // ✅ create an arrow function version of the formatPrice function
 
+// const formatPrice = function(priceToConvert) {
+//   return `$${priceToConvert.toFixed(2)}`
+// }
+
+// Arrow Function Expression
+// Expression because we have the construct variable = function
+// Arrow because the function follows arrow notation
+
+// Arrow function immediately/implicitly return what's on the same line of the arrow
+
+const formatPrice = (priceToConvert) => `$${priceToConvert.toFixed(2)}`
+
 // ✅ create a blurb() function that accepts a book as an argument and logs a message in the following format:
 // 'Eloquent JavaScript: A Modern Introduction to Programming by Marjin Haverbeke is on sale for $10.00'
+
+const blurb = (bookObj) => `${bookObj['title']} by ${bookObj['author']} is on sale for ${formatPrice(bookObj['price'])}`
+
 
 //! 💡 Scope
 
