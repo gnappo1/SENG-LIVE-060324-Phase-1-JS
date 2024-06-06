@@ -34,6 +34,11 @@ function changeHeader() {
     const h1 = document.querySelector("div#header div h1")
     h1.innerText = "A new name"
 }
+function removeEl(el) {
+    //! How do I remove the entire tile with the book???
+    el.remove()
+}
+
 function renderBook(book) {
     const li = document.createElement("li")
     li.className = "list-li"
@@ -47,6 +52,17 @@ function renderBook(book) {
     img.src = book.imageUrl
     img.alt = book.title
     const button = document.createElement("button")
+    //! ATTACH LISTENER HERE so that when the button is appended
+    //! it is already listening to the click event!
+    //* When you have to pass arguments to a callback function inside addEventListener
+    //TODO you have to make the entire second argument a function
+    //* Add the following after the first argument's comma: () =>
+    //* Add the following after the first argument's comma: function() {
+    button.addEventListener("click", function() {removeEl(li)})
+
+
+    
+    // button.addEventListener("click", () => li.remove())
     button.innerText = "Delete"
     li.append(h3, pAuthor, pPrice, img, button)
     // figure out where
@@ -55,6 +71,7 @@ function renderBook(book) {
     // append
     ulList.appendChild(li)
 }
+//!===================
 function renderBookAsHTML(book) {
     const ulList = document.getElementById("book-list")
     ulList.innerHTML += `
@@ -67,34 +84,16 @@ function renderBookAsHTML(book) {
     </li>
     `
 }
-function renderBook(book) {
-    const li = document.createElement("li")
-    li.className = "list-li"
-    const h3 = document.createElement("h3")
-    h3.innerText = book.title
-    const pAuthor = document.createElement("p")
-    pAuthor.innerText = book.author
-    const pPrice = document.createElement("p")
-    pPrice.innerText = formatPrice(book.price)
-    const img = document.createElement("img")
-    img.src = book.imageUrl
-    img.alt = book.title
-    const button = document.createElement("button")
-    button.addEventListener('click', () => {
-        li.remove()
-    })
-    button.innerText = "Delete"
-    li.append(h3, pAuthor, pPrice, img, button)
-    // figure out where
-    // target that place with querySelector/getElementById
-    const ulList = document.getElementById("book-list")
-    // append
-    ulList.appendChild(li)
-}
+const allDeleteButtons = document.querySelectorAll(".list-li button")
+
+allDeleteButtons.forEach(btn => {
+    btn.addEventListener("click", () => btn.parentNode.remove())
+})
+//!===================
 
 setHeader()
 changeFooter()
-bookStore.inventory.forEach(bookObj => renderBookAsHTML(bookObj))
+bookStore.inventory.forEach(bookObj => renderBook(bookObj))
 // bookStore.inventory.forEach(renderBook) this line leverages JS magic 
 // BUT IT'S IDENTICAL TO THE ONE ABOVE
 
@@ -121,3 +120,41 @@ bookStore.inventory.forEach(bookObj => renderBookAsHTML(bookObj))
   // IF YOU WANT use an arrow function for readability.
 
 
+//! TOGGLE FORM BUTTON
+const toggleBtn = document.querySelector("#toggleForm")
+const bookForm = document.querySelector("#book-form")
+
+function toggleFormFn() {
+    bookForm.classList.toggle("collapsed")
+}
+
+toggleBtn.addEventListener("click", toggleFormFn)
+
+bookForm.addEventListener("submit", function(e) {
+    //! Extract the book info from the form/page
+    e.preventDefault() //! NO PAGE REFRESHES EVEEEEEEER
+    debugger
+    // Make sure the data looks good before you use it in any way
+    if (!document.querySelector("#form-title").value) {
+        alert("Title must be present!")
+        return
+    }
+
+    // extract the data and package it into an object
+    const newBook = {
+        title: e.target['form-title'].value,
+        author: document.querySelector("#form-author").value,
+        price: Number(document.querySelector("#form-price").value),
+        inventory: Number(document.querySelector("#form-inventory").value),
+        imageUrl: document.querySelector("#form-imageUrl").value,
+        reviews: []
+
+    }
+
+    // append the HTML structure for each book onto the page
+    //! leveraging existing helper functions
+    renderBook(newBook)
+
+    //! Empty the entire form
+    e.target.reset()
+})

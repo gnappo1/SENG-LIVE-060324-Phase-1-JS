@@ -6,6 +6,13 @@ body {
     opacity: 0;
   }
   
+  .red {
+    color: red;
+  }
+
+  .left {
+    float: left;
+  }
   /* allows us to animate a collapsed element appearing after a click  */
   .collapsed {
     max-height: 0;
