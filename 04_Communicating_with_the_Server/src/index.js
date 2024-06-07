@@ -135,3 +135,35 @@ bookForm.addEventListener('submit', handleSubmit)
 //! sure we still see the books and store details
 
 ////////////////////////////////////////////////////////////////
+fetchStoreData() //! HOISTING!!!!
+
+function fetchStoreData(){
+    return getJSON("http://localhost:3001/stores/1")
+    .then(function(data) {
+        setHeader(data)
+        changeFooter(data)
+    })
+    .catch(function(error) {
+        console.log(error)
+    })
+}
+
+fetchBookData()
+
+function fetchBookData(){
+    return getJSON("http://localhost:3001/books")
+    .then(function(bookData) {
+        bookData.forEach(function(book){renderBook(book)})
+        // bookData.forEach(renderBook)
+    })
+}
+
+function getJSON(url) {
+    return fetch(url)
+    .then(function (resp) {
+        return resp.json()
+    })
+    .catch(function (error) {
+        console.log(error)
+    })
+}

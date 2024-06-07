@@ -1,7 +1,7 @@
 {
     "stores": [
       {
-        "id": 1,
+        "id": "1",
         "location": "Seattle",
         "address": "333 st ne Seattle wa 99999",
         "number": 9999999999,
@@ -9,7 +9,7 @@
         "hours": "Monday - Friday 9am - 6pm"
       }, 
       {
-        "id": 2,
+        "id": "2",
         "location": "New York",
         "address": "555 pl sw NY 10099",
         "number": 1110009999,
@@ -17,7 +17,7 @@
         "hours": "Monday - Friday 10am - 9pm"
       }, 
       {
-        "id": 3,
+        "id": "3",
         "location": "Los Angeles",
         "address": "2525 drive Los Angeles CA 90002",
         "number": 5554443333,
