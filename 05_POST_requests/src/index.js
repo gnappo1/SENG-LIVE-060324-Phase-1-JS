@@ -1,3 +1,4 @@
+// import { v4 as uuidv4 } from 'uuid';
 //////////////////////////////////////////////////////////
 // Fetch Data & Call render functions to populate the DOM
 //////////////////////////////////////////////////////////
@@ -67,6 +68,7 @@ function renderBook(book) {
     
   const li = document.createElement('li');
   li.className = 'list-li';
+  li.id = book.id
   
   const h3 = document.createElement('h3');
   h3.textContent = book.title;
@@ -197,17 +199,60 @@ window.addEventListener('keydown', (e) => {
 const handleSubmit = (e) => {
     e.preventDefault()
     // how do I extract all of the info from the form -> e.target.NAMEATTRIBUTE.value
+    if (!e.target.title.value) {
+      alert("Title must be present!")
+      return
+    }
     // how do I build ONE object out of it
     const newBook = {
         title: e.target.title.value,
         author: e.target.author.value,
         price: e.target.price.valueAsNumber,
-        inventory: e.target.inventory.valueAsNumber,
+        inventory: Number(e.target.inventory.value),
         imageUrl: e.target.imageUrl.value,
+        id: uuidv4().slice(0, 4)
     }
-    // what do I do with the object
-    renderBook(newBook)
-    e.target.reset() // EMPTY THE FORM
+
+    //! PESSIMISTIC APPROACH
+    // fetch("http://localhost:3000/books", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify(newBook)
+    // })
+    // .then(resp => resp.json())
+    // .then(createdBook => {
+    //   //! The createdBook has an id while our newBook does not!
+    //   renderBook(createdBook)
+    //   e.target.reset() // EMPTY THE FORM
+    // })
+    // .catch(renderError)
+
+    //! OPTIMISTIC APPROACH
+    renderBook(newBook) //! change UI to display book SYNC
+    
+    fetch("http://localhost:3000/books", { //! talk to the json-server to persist the book - ASYNC
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newBook)
+    })
+    .then(resp => {
+      if (!resp.ok) {
+        throw "Something went wrong while posting!"
+      } else {
+        e.target.reset() //! if the resp is ok, then clear the form!
+      }
+    })
+    .catch(err => {
+      renderError(err)
+    //! target the prematurely added el by their id
+      const targetToRemove = document.querySelector(`#${newBook.id}`)
+      targetToRemove.remove()
+    })
+
 }
 
 // bookForm.addEventListener('submit', e => handleSubmit(e, somethingElse))
@@ -227,3 +272,10 @@ fillIn(storeForm, {
   hours: "Monday - Friday 9am - 6pm"
 })
 
+fillIn(bookForm, {
+  title: "Test",
+  author: "Matteo",
+  price: 1.99,
+  imageUrl: "https://images-na.ssl-images-amazon.com/images/I/51IKycqTPUL._SX218_BO1,204,203,200_QL40_FMwebp_.jpg",
+  inventory: 3 
+})
