@@ -64,19 +64,20 @@ function addSelectOptionForStore(store) {
 }
 
 function renderBook(book) {
-    
+  const targetUl = document.querySelector('#book-list')
   const li = document.createElement('li');
   li.className = 'list-li';
-  
+  li.id = book.id
+
   const h3 = document.createElement('h3');
   h3.textContent = book.title;
 
   const pAuthor = document.createElement('p');
   pAuthor.textContent = book.author;
-  
+
   const pPrice = document.createElement('p');
   pPrice.textContent = `${formatPrice(book.price)}`;
-  
+
   const pStock = document.createElement('p');
   pStock.className = "grey";
   if (book.inventory === 0) {
@@ -86,20 +87,57 @@ function renderBook(book) {
   } else {
     pStock.textContent = "In stock"
   }
-  
+
   const img = document.createElement('img');
   img.src = book.imageUrl;
   img.alt = `${book.title} cover`;
 
-  const btn = document.createElement('button');
-  btn.textContent = 'Delete';
+  const editBtn = document.createElement('button');
+  editBtn.textContent = 'Edit';
+  editBtn.addEventListener('click', (e) => {
+    //! Show the form
+    bookForm.classList.remove("collapsed")
+    
+    //! Populate the form since it's a UPDATE with the correct book data
+    fillIn(bookForm, book)
 
-  btn.addEventListener('click', (e) => {
-    li.remove();
+    //! Embed the id of the book somewhere smart for later retrieval
+    bookForm.dataset.bookId = book.id
+
+    //! Change the text of the button inside the edit form
+    bookForm.querySelector('input[type="submit"]').value = "Update Book"
+
+
+  })
+  const deleteBtn = document.createElement('button');
+  deleteBtn.textContent = 'Delete';
+
+  deleteBtn.addEventListener('click', (e) => {
+    //! OPTIMISTIC
+    // const currentBookHTMLStructure = targetUl.innerHTML
+    // li.remove();
+    // fetch(`http://localhost:3000/book/${book.id}`, { method: "DELETE" })
+    // .then(response => {
+    //   if (!response.ok) {
+    //     targetUl.innerHTML = currentBookHTMLStructure // restores initial order
+    //     // targetUl.append(li) IT WOULD ADD THE ELEMENT BACK BUT AT THE END
+    //   }
+    // })
+    // .catch(err => console.log(err))
+
+    //! PESSIMISTIC
+    fetch(`http://localhost:3000/books/${book.id}`, { method: "DELETE" })
+    .then((resp) => {
+      if (resp.ok) {
+        li.remove();
+      } else {
+        renderError(`Something went wrong while deleting the record with id #${book.id}`)
+      }
+    })
   })
 
-  li.append(h3, pAuthor, pPrice, pStock, img, btn);
-  document.querySelector('#book-list').append(li);
+  li.append(h3, pAuthor, pPrice, pStock, img, editBtn, deleteBtn);
+  targetUl.append(li);
 }
 
 function renderError(error) {
@@ -130,7 +168,10 @@ function fillIn(form, data) {
     // in an object at variable keys, i.e. when
     // we don't know the key name up front.
     // In this case, it comes from an argument.
-    form[field].value = data[field]
+    form[field] ? form[field].value = data[field] : null
+    // if (form[field]) {
+    //   form[field].value = data[field]
+    // }
   }
 }
 
@@ -195,19 +236,70 @@ window.addEventListener('keydown', (e) => {
 // }
 // we can use a book as an argument for renderBook!  This will add the book's info to the webpage.
 const handleSubmit = (e) => {
-    e.preventDefault()
+  e.preventDefault()
+  debugger
+  if (!e.target.title.value) {
+    alert("Title must be present!")
+    return
+  }
+
+  const formBook = {
+    title: e.target.title.value,
+    author: e.target.author.value,
+    price: e.target.price.valueAsNumber,
+    inventory: Number(e.target.inventory.value),
+    imageUrl: e.target.imageUrl.value,
+    id: uuidv4().slice(0, 4)
+  }
+
+  if (bookForm.querySelector("input[type='submit']").value === "ADD BOOK") {
+
     // how do I extract all of the info from the form -> e.target.NAMEATTRIBUTE.value
+  // how do I build ONE object out of it
     // how do I build ONE object out of it
-    const newBook = {
-        title: e.target.title.value,
-        author: e.target.author.value,
-        price: e.target.price.valueAsNumber,
-        inventory: e.target.inventory.valueAsNumber,
-        imageUrl: e.target.imageUrl.value,
-    }
-    // what do I do with the object
-    renderBook(newBook)
-    e.target.reset() // EMPTY THE FORM
+
+    //! PESSIMISTIC APPROACH
+    fetch("http://localhost:3000/books", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formBook)
+    })
+    .then(resp => resp.json())
+    .then(createdBook => {
+      //! The createdBook has an id while our newBook does not!
+      renderBook(createdBook)
+      e.target.reset() // EMPTY THE FORM
+    })
+    .catch(renderError)
+  } else {
+    const bookId = e.target.dataset.bookId
+    //! Add the patch logic
+    fetch(`http://localhost:3000/books/${bookId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formBook)
+    })
+      .then(resp => resp.json())
+      .then(updatedBook => {
+        const liToReplace = document.getElementById(bookId)
+        liToReplace.innerHTML = (`
+          <h3>${updatedBook.title}</h3>
+          <p>${updatedBook.author}</p>'
+          <p>${formatPrice(updatedBook.price)}</p>
+          <p class="grey">${inventory > 0 ? "In stock" : "Out of Stock"}</p>
+          <img src=${updatedBook.imageUrl} alt=${updatedBook.title}>
+          <button>Edit</button>
+          <button>Delete</button>`)
+        //! The updatedBook should replace the existing old book currently on the page
+        e.target.reset() // EMPTY THE FORM
+        bookForm.classList.add("collapsed")
+      })
+      .catch(renderError)
+  }
 }
 
 // bookForm.addEventListener('submit', e => handleSubmit(e, somethingElse))
